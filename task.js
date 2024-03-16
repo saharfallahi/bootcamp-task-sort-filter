@@ -25,28 +25,38 @@ const notesList = [
 },
 ];
 
-
-function sortAndFilterNotes(arrOfNotes,sortOrder="asce",filterTitle=null, filterComplete=null){
-    const notes= [...arrOfNotes];
-
-    // sort notes based on date
-    if(sortOrder==="asce"){
-        notes.sort((a,b)=>new Date(a.createdAt)-new Date(b.createdAt));
-    }else if(sortOrder==="desc"){
-        notes.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+function filterStatus(data,status){
+    switch (status) {
+        case "all":
+            return data;
+        case "completed":
+            return data.filter((n)=> n.completed);
+        case "uncompleted":
+            return data.filter((n)=> !n.completed);
     }
-    
-    //filter the notes based on title and completeness
-    const filteredNotes=notes.filter((note)=>{
-        if(filterTitle && !note.title.toLowerCase().includes(filterTitle.toLowerCase())){
-            return false;
-        }
-        if(filterComplete && note.completed!==filterComplete){
-            return false;
-        }
-        return true;
-    });
-    return filteredNotes;
 }
 
-console.log(sortAndFilterNotes(notesList,"asce","co",false));
+function searchData(data,filter){
+    return data.filter((note)=>note.title.toLowerCase().includes(filter.trim().toLowerCase()));
+}
+
+function sortData(data,sortBy){
+    if(sortBy==="asce"){
+        return [...data].sort((a,b)=>new Date(a.createdAt)-new Date(b.createdAt));
+    }else if(sortBy==="desc"){
+        return [...data].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+    }
+}
+
+
+function queryData(data,{sortBy,filter,status}){
+    let filteredData;
+    filteredData=searchData(data,filter);
+    filteredData=filterStatus(filteredData,status);
+    filteredData=sortData(filteredData,sortBy);
+
+    return filteredData;
+}
+
+
+console.log(queryData(notesList,{filter:"co",sortBy:"asce",status:"all"}));
